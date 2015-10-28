@@ -100,10 +100,9 @@ class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
         $baseClass = $this->className;
         $articleClass = $baseClass::getBaseClass();
 
-        $objectIDs = array();
         $attachedNewsIDs = array();
         foreach ($this->objects as $article) {
-            $objectIDs[] = $article->{$baseClass::getDatabaseTableIndexName()};
+            $this->objectIDs[] = $article->{$baseClass::getDatabaseTableIndexName()};
             if ($article->attachments != 0) {
                 $attachedObjectIDs[] = $article->{$baseClass::getDatabaseTableIndexName()};
             }
