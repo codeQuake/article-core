@@ -233,10 +233,11 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
      */
     public function getTags()
     {
-        $tags = TagEngine::getInstance()->getObjectTags(static::objectType, 
-                                                        $this->{static::getDatabaseTableIndexName()}, 
-                                                        array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
-                                                        );
+        $tags = TagEngine::getInstance()->getObjectTags(
+            static::objectType, 
+            $this->{static::getDatabaseTableIndexName()}, 
+            array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
+            );
 
         return $tags;
     }
