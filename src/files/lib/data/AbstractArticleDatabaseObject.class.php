@@ -138,9 +138,9 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
                     WHERE '.static::getDatabaseTableIndexName().' = ?';
                     $statement = WCF::getDB()->prepareStatement($sql);
                     $statement->execute(array($this->{static::getDatabaseTableIndexName()}));
-                    while ($row = $statement->fetchArray()) {
-                        $this->categories[$row['categoryID']] = new $className(CategoryHandler::getInstance()->getCategory($row['categoryID']));
-                    }
+                while ($row = $statement->fetchArray()) {
+                    $this->categories[$row['categoryID']] = new $className(CategoryHandler::getInstance()->getCategory($row['categoryID']));
+                }
             }
         }
 
