@@ -123,30 +123,29 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     {
         $classParts = explode('\\', get_called_class());
         $articleType = explode('.', self::$objectType);
+        $className = self::$categoryBasicClass;
         if ($this->categories === null) {
             $this->categories = array();
 
             if (0 !== count($this->categoryIDs)) {
                 foreach ($this->categoryIDs as $categoryID) {
-                    $this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
+                    $this->categories[$categoryID] = new $className(CategoryHandler::getInstance()->getCategory($categoryID));
                 }
-            } else {
-                $sql = '
-                    SELECT categoryID 
-                    FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
-                    WHERE '.static::getDatabaseTableIndexName().' = ?';
-                    $statement = WCF::getDB()->prepareStatement($sql);
-                    $statement->execute(array($this->{static::getDatabaseTableIndexName()}));
-
-                    while ($row = $statement->fetchArray()) {
-                        $this->categories[$row['categoryID']] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($row['categoryID']));
-                    }
+        } else {
+            $sql = '
+                SELECT categoryID 
+                FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
+                WHERE '.static::getDatabaseTableIndexName().' = ?';
+                $statement = WCF::getDB()->prepareStatement($sql);
+                $statement->execute(array($this->{static::getDatabaseTableIndexName()}));
+                while ($row = $statement->fetchArray()) {
+                    $this->categories[$row['categoryID']] = new $className(CategoryHandler::getInstance()->getCategory($row['categoryID']));
                 }
             }
-
-            return $this->categories;
         }
 
+        return $this->categories;
+    }
 
     /**
      * @return int[]
