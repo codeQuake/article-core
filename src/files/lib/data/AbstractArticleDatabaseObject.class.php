@@ -94,10 +94,12 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
             $attachmentList->getConditionBuilder()->add('attachment.objectID IN (?)', array($this->{static::getDatabaseTableIndexName()}));
             $attachmentList->readObjects();
             //add permissions!
-            $attachmentList->setPermissions(array(
-                'canDownload' => '',
-                'canViewPreview' => ''
-            ));
+            $attachmentList->setPermissions(
+                array(
+                    'canDownload' => '',
+                    'canViewPreview' => '',
+                )
+            );
             AttachmentBBCode::setAttachmentList($attachmentList);
 
             return $attachmentList;
@@ -125,11 +127,10 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
             $this->categories = array();
 
             if (0 !== count($this->categoryIDs)) {
-            foreach ($this->categoryIDs as $categoryID) {
-                $this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
+                foreach ($this->categoryIDs as $categoryID) {
+                    $this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
                 }
-       } 
-       else {
+            } else {
                 $sql = '
                     SELECT categoryID 
                     FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
@@ -163,14 +164,14 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
         return StringUtil::truncateHTML($this->getSimplifiedFormattedMessage(), $maxLength);
     }
 
-    /** 
-     *    {@inheritdoc}
+    /**
+     * {@inheritdoc}
      */
     public function getFormattedMessage()
     {
         AttachmentBBCode::setObjectID($this->{static::getDatabaseTableIndexName()});
         MessageParser::getInstance()->setOutputType('text/html');
-        
+
         return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
     }
 
@@ -234,9 +235,9 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     public function getTags()
     {
         $tags = TagEngine::getInstance()->getObjectTags(
-            static::objectType, 
-            $this->{static::getDatabaseTableIndexName()}, 
-            array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
+            static::objectType,
+            $this->{static::getDatabaseTableIndexName()},
+                array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
             );
 
         return $tags;
