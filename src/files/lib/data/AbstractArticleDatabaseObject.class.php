@@ -1,13 +1,16 @@
 <?php
 namespace wcf\data;
 
+use wcf\data\attachment\GroupedAttachmentList;
 use wcf\data\IMessage;
 use wcf\system\bbcode\AttachmentBBCode;
 use wcf\system\bbcode\MessageParser;
 use wcf\system\breadcrumb\Breadcrumb;
 use wcf\system\breadcrumb\IBreadcrumbProvider;
 use wcf\system\language\LanguageFactory;
-use wcf\system\request\IRouteController; 
+use wcf\system\request\IRouteController;
+use wcf\system\request\LinkHandler;
+use wcf\system\tagging\TagEngine; 
 use wcf\util\StringUtil;
 
 /**
@@ -19,8 +22,19 @@ use wcf\util\StringUtil;
  * @package de.codequake.core.article
  */
 
- abstract class AbstractArticleDatabaseObject extends DatabaseObject implements IRouteController, IMessage {
+ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements IRouteController, IMessage, IBreadcrumbProvider {
 	
+	/**
+	 * categoryIDs article is connected to
+	 * @var array<int>
+	 */
+	protected $categoryIDs = array();
+
+	/**
+	 * @var string
+	 */
+	protected static $objectType = '';
+
 	/** 
 	 * main controller for viewing objects of this class
 	 * @var	string 
@@ -32,13 +46,6 @@ use wcf\util\StringUtil;
 	 */
 	public function __toString() {
 		return $this->getFormattedMessage();
-	}
-
-	/**
-	 * {@inheritdoc}
-	 */
-	public function getBreadcrumb() {
-		return new Breadcrumb($this->subject, $this->getLink());
 	}
 
 	/**
@@ -65,6 +72,69 @@ use wcf\util\StringUtil;
 		return false;
 	}
 
+	/**
+	 *	@return \wcf\data\attachment\GroupedAttachmentList
+	 */
+
+	public function getAttachments() {
+		if (MODULE_ATTACHMENT && $this->attachments) {
+			$attachmentList = new GroupedAttachmentList(static::objectType);
+			$attachmentList->getConditionBuilder()->add('attachment.objectID IN (?)', array($this->{static::getDatabaseTableIndexName()}));
+			$attachmentList->readObjects();
+			//add permissions!
+			$attachmentList->setPermissions(array(
+				'canDownload' => '',
+				'canViewPreview' => ''
+			));
+			AttachmentBBCode::setAttachmentList($attachmentList);
+
+			return $attachmentList;
+		}
+		return;
+	}
+
+	/**
+	 * {@inheritdoc}
+	 */
+	public function getBreadcrumb() {
+		return new Breadcrumb($this->subject, $this->getLink());
+	}
+
+	/** 
+	 * @return array<\cms\data\category\NewsCategory> 
+	 */ 
+	public function getCategories() { 
+		if ($this->categories === null) { 
+			$this->categories = array(); 
+
+			 if (0 !== count($this->categoryIDs)) { 
+				foreach ($this->categoryIDs as $categoryID) { 
+					$this->categories[$categoryID] = new NewsCategory(CategoryHandler::getInstance()->getCategory($categoryID)); 
+				} 
+			} else { 
+				$sql = ' 
+					SELECT categoryID 
+					FROM cms'.WCF_N.'_news_to_category 
+					WHERE newsID = ?'; 
+					$statement = WCF::getDB()->prepareStatement($sql); 
+					$statement->execute(array($this->newsID)); 
+
+					while ($row = $statement->fetchArray()) { 
+						$this->categories[$row['categoryID']] = new NewsCategory(CategoryHandler::getInstance()->getCategory($row['categoryID'])); 
+					} 
+				} 
+			} 
+
+			return $this->categories; 
+		} 
+
+
+	/**
+	 * @return int[]
+	 */
+	public function getCategoryIDs() {
+		return $this->categoryIDs;
+	}
 
 	/**
 	 * {@inheritdoc}
@@ -77,7 +147,7 @@ use wcf\util\StringUtil;
 	 *	{@inheritdoc}
 	 */
 	public function getFormattedMessage() {
-		AttachmentBBCode::setObjectID($this->{$this->$databaseTableIndexName});
+		AttachmentBBCode::setObjectID($this->{static:getDatabaseTableIndexName()});
 		MessageParser::getInstance()->setOutputType('text/html');
 		return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
 	}
@@ -107,7 +177,7 @@ use wcf\util\StringUtil;
 	public function getLink($appendSession = true) 
 	{
 		$classParts = explode('\\', get_called_class());
-		return LinkHandler::getInstance()->getLink(static::$objectViewController, array( 
+		return LinkHandler::getInstance()->getLink(self::$objectViewController, array( 
 			'application' => $classParts[0], 
 			'object' => $this, 
 			'appendSession' => $appendSession, 
@@ -128,6 +198,17 @@ use wcf\util\StringUtil;
 	public function getSimplifiedFormattedMessage() {
 		MessageParser::getInstance()->setOutputType('text/simplified-html');
 		return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
+	}
+
+	/**
+	 * @return array<\wcf\data\tag\Tag>
+	 */
+	public function getTags() {
+		$tags = TagEngine::getInstance()->getObjectTags(static::objectType, 
+														$this->{static::getDatabaseTableIndexName()}, 
+														array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
+														);
+		return $tags;
 	}
 
 	/**
@@ -158,4 +239,17 @@ use wcf\util\StringUtil;
 		return $this->username;
 	}
 
+	/**
+	 * @param int $categoryID
+	 */
+	public function setCategoryID($categoryID) {
+		$this->categoryIDs[] = $categoryID;
+	}
+
+	/**
+	 * @param array<int> $categoryIDs
+	 */
+	public function setCategoryIDs(array $categoryIDs) {
+		$this->categoryIDs = $categoryIDs;
+	}
 }
