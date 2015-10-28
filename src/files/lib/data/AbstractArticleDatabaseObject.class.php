@@ -12,20 +12,20 @@ use wcf\system\language\LanguageFactory;
 use wcf\system\request\IRouteController;
 use wcf\system\request\LinkHandler;
 use wcf\system\tagging\TagEngine;
-use wcf\system\WCF; 
+use wcf\system\WCF;
 use wcf\util\StringUtil;
 
 /**
  * Abstract class for all article based database objects.
- * 
- * @author	Jens Krumsieck
- * @copyright	2013-2015 codeQuake
- * @license	GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
+ *
+ * @author Jens Krumsieck
+ * @copyright 2013-2015 codeQuake
+ * @license GNU Lesser General Public License <http://opensource.org/licenses/lgpl-license.php>
  * @package de.codequake.core.article
  */
 
- abstract class AbstractArticleDatabaseObject extends DatabaseObject implements IRouteController, IMessage, IBreadcrumbProvider {
-	
+abstract class AbstractArticleDatabaseObject extends DatabaseObject implements IRouteController, IMessage, IBreadcrumbProvider
+{
 	/**
 	 * php class for categories
 	 * @var string
@@ -52,7 +52,8 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function __toString() {
+	public function __toString()
+	{
 		return $this->getFormattedMessage();
 	}
 
@@ -60,7 +61,8 @@ use wcf\util\StringUtil;
 	 * check whether user can add new object
 	 * @return bool
 	 */
-	public function canAdd() {
+	public function canAdd()
+	{
 		return false;
 	}
 
@@ -68,7 +70,8 @@ use wcf\util\StringUtil;
 	 * check whether user can moderate current object
 	 * @return bool
 	 */
-	public function canModerate() {
+	public function canModerate()
+	{
 		return false;
 	}
 
@@ -76,7 +79,8 @@ use wcf\util\StringUtil;
 	 * @check whether user can read current object
 	 * @return bool
 	 */
-	public function canRead() {
+	public function canRead()
+	{
 		return false;
 	}
 
@@ -84,7 +88,8 @@ use wcf\util\StringUtil;
 	 * @return \wcf\data\attachment\GroupedAttachmentList
 	 */
 
-	public function getAttachments() {
+	public function getAttachments()
+	{
 		if (MODULE_ATTACHMENT && $this->attachments) {
 			$attachmentList = new GroupedAttachmentList(self::$objectType);
 			$attachmentList->getConditionBuilder()->add('attachment.objectID IN (?)', array($this->{static::getDatabaseTableIndexName()}));
@@ -104,58 +109,63 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getBreadcrumb() {
+	public function getBreadcrumb()
+	{
 		return new Breadcrumb($this->subject, $this->getLink());
 	}
 	/** 
 	 * @return array<self::$categoryBasicClass> 
 	 */ 
-	public function getCategories() { 
+	public function getCategories()
+	{
 		$classParts = explode('\\', get_called_class());
 		$articleType = explode('.', self::$objectType);
-		if ($this->categories === null) { 
-			$this->categories = array(); 
+		if ($this->categories === null) {
+			$this->categories = array();
 
-			 if (0 !== count($this->categoryIDs)) { 
-				foreach ($this->categoryIDs as $categoryID) { 
-					$this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID)); 
+			 if (0 !== count($this->categoryIDs)) {
+				foreach ($this->categoryIDs as $categoryID) {
+					$this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
 				} 
 			} else { 
 				$sql = ' 
 					SELECT categoryID 
 					FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category 
-					WHERE '.static::getDatabaseTableIndexName().' = ?'; 
-					$statement = WCF::getDB()->prepareStatement($sql); 
-					$statement->execute(array($this->{static::getDatabaseTableIndexName()})); 
+					WHERE '.static::getDatabaseTableIndexName().' = ?';
+					$statement = WCF::getDB()->prepareStatement($sql);
+					$statement->execute(array($this->{static::getDatabaseTableIndexName()}));
 
-					while ($row = $statement->fetchArray()) { 
-						$this->categories[$row['categoryID']] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($row['categoryID'])); 
-					} 
-				} 
-			} 
+					while ($row = $statement->fetchArray()) {
+						$this->categories[$row['categoryID']] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($row['categoryID']));
+					}
+				}
+			}
 
-			return $this->categories; 
+			return $this->categories;
 		} 
 
 
 	/**
 	 * @return int[]
 	 */
-	public function getCategoryIDs() {
+	public function getCategoryIDs()
+	{
 		return $this->categoryIDs;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getExcerpt($maxLength = 255) {
+	public function getExcerpt($maxLength = 255)
+	{
 		return StringUtil::truncateHTML($this->getSimplifiedFormattedMessage(), $maxLength);
 	}
 
 	/** 
 	 *	{@inheritdoc}
 	 */
-	public function getFormattedMessage() {
+	public function getFormattedMessage()
+	{
 		AttachmentBBCode::setObjectID($this->{static::getDatabaseTableIndexName()});
 		MessageParser::getInstance()->setOutputType('text/html');
 		return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
@@ -164,7 +174,8 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getLanguage() {
+	public function getLanguage()
+	{
 		if ($this->languageID) { 
 			 return LanguageFactory::getInstance()->getLanguage($this->languageID); 
 		 } 
@@ -174,7 +185,8 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getLanguageIcon() {
+	public function getLanguageIcon()
+	{
 		return '<img src="'.$this->getLanguage()->getIconPath().'" alt="" title="'.$this->getLanguage().'" class="jsTooltip iconFlag" />';
 	}
 
@@ -197,14 +209,16 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getMessage() {
+	public function getMessage()
+	{
 		return $this->message;
 	}
 
 	/**
 	 *	{@inheritdoc}
 	 */
-	public function getSimplifiedFormattedMessage() {
+	public function getSimplifiedFormattedMessage()
+	{
 		MessageParser::getInstance()->setOutputType('text/simplified-html');
 		return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
 	}
@@ -212,7 +226,8 @@ use wcf\util\StringUtil;
 	/**
 	 * @return array<\wcf\data\tag\Tag>
 	 */
-	public function getTags() {
+	public function getTags()
+	{
 		$tags = TagEngine::getInstance()->getObjectTags(static::objectType, 
 														$this->{static::getDatabaseTableIndexName()}, 
 														array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
@@ -223,42 +238,48 @@ use wcf\util\StringUtil;
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getTime() {
+	public function getTime()
+	{
 		return $this->time;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getTitle() {
+	public function getTitle()
+	{
 		return $this->title;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getUserID() {
+	public function getUserID()
+	{
 		return $this->userID;
 	}
 
 	/**
 	 * {@inheritdoc}
 	 */
-	public function getUsername() {
+	public function getUsername()
+	{
 		return $this->username;
 	}
 
 	/**
 	 * @param int $categoryID
 	 */
-	public function setCategoryID($categoryID) {
+	public function setCategoryID($categoryID)
+	{
 		$this->categoryIDs[] = $categoryID;
 	}
 
 	/**
 	 * @param array<int> $categoryIDs
 	 */
-	public function setCategoryIDs(array $categoryIDs) {
+	public function setCategoryIDs(array $categoryIDs)
+	{
 		$this->categoryIDs = $categoryIDs;
 	}
 }
