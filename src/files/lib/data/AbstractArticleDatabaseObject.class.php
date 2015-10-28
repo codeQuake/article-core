@@ -7,10 +7,12 @@ use wcf\system\bbcode\AttachmentBBCode;
 use wcf\system\bbcode\MessageParser;
 use wcf\system\breadcrumb\Breadcrumb;
 use wcf\system\breadcrumb\IBreadcrumbProvider;
+use wcf\system\category\CategoryHandler;
 use wcf\system\language\LanguageFactory;
 use wcf\system\request\IRouteController;
 use wcf\system\request\LinkHandler;
-use wcf\system\tagging\TagEngine; 
+use wcf\system\tagging\TagEngine;
+use wcf\system\WCF; 
 use wcf\util\StringUtil;
 
 /**
@@ -24,6 +26,12 @@ use wcf\util\StringUtil;
 
  abstract class AbstractArticleDatabaseObject extends DatabaseObject implements IRouteController, IMessage, IBreadcrumbProvider {
 	
+	/**
+	 * php class for categories
+	 * @var string
+	 */
+	protected static $categoryBasicClass = '';
+
 	/**
 	 * categoryIDs article is connected to
 	 * @var array<int>
@@ -73,12 +81,12 @@ use wcf\util\StringUtil;
 	}
 
 	/**
-	 *	@return \wcf\data\attachment\GroupedAttachmentList
+	 * @return \wcf\data\attachment\GroupedAttachmentList
 	 */
 
 	public function getAttachments() {
 		if (MODULE_ATTACHMENT && $this->attachments) {
-			$attachmentList = new GroupedAttachmentList(static::objectType);
+			$attachmentList = new GroupedAttachmentList(self::$objectType);
 			$attachmentList->getConditionBuilder()->add('attachment.objectID IN (?)', array($this->{static::getDatabaseTableIndexName()}));
 			$attachmentList->readObjects();
 			//add permissions!
@@ -99,28 +107,29 @@ use wcf\util\StringUtil;
 	public function getBreadcrumb() {
 		return new Breadcrumb($this->subject, $this->getLink());
 	}
-
 	/** 
-	 * @return array<\cms\data\category\NewsCategory> 
+	 * @return array<self::$categoryBasicClass> 
 	 */ 
 	public function getCategories() { 
+		$classParts = explode('\\', get_called_class());
+		$articleType = explode('.', self::$objectType);
 		if ($this->categories === null) { 
 			$this->categories = array(); 
 
 			 if (0 !== count($this->categoryIDs)) { 
 				foreach ($this->categoryIDs as $categoryID) { 
-					$this->categories[$categoryID] = new NewsCategory(CategoryHandler::getInstance()->getCategory($categoryID)); 
+					$this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID)); 
 				} 
 			} else { 
 				$sql = ' 
 					SELECT categoryID 
-					FROM cms'.WCF_N.'_news_to_category 
-					WHERE newsID = ?'; 
+					FROM '.$classParts[0].WCF_N.'_'.reset($articleType).'_to_category 
+					WHERE '.static::getDatabaseTableIndexName().' = ?'; 
 					$statement = WCF::getDB()->prepareStatement($sql); 
-					$statement->execute(array($this->newsID)); 
+					$statement->execute(array($this->{static::getDatabaseTableIndexName()})); 
 
 					while ($row = $statement->fetchArray()) { 
-						$this->categories[$row['categoryID']] = new NewsCategory(CategoryHandler::getInstance()->getCategory($row['categoryID'])); 
+						$this->categories[$row['categoryID']] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($row['categoryID'])); 
 					} 
 				} 
 			} 
@@ -147,7 +156,7 @@ use wcf\util\StringUtil;
 	 *	{@inheritdoc}
 	 */
 	public function getFormattedMessage() {
-		AttachmentBBCode::setObjectID($this->{static:getDatabaseTableIndexName()});
+		AttachmentBBCode::setObjectID($this->{static::getDatabaseTableIndexName()});
 		MessageParser::getInstance()->setOutputType('text/html');
 		return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
 	}
