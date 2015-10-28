@@ -123,7 +123,7 @@ use wcf\util\StringUtil;
 			} else { 
 				$sql = ' 
 					SELECT categoryID 
-					FROM '.$classParts[0].WCF_N.'_'.reset($articleType).'_to_category 
+					FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category 
 					WHERE '.static::getDatabaseTableIndexName().' = ?'; 
 					$statement = WCF::getDB()->prepareStatement($sql); 
 					$statement->execute(array($this->{static::getDatabaseTableIndexName()})); 
