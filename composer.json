@@ -1,0 +1,9 @@
+﻿{
+  "name": "codequake/article-core",
+  "description": "core project for article based apps",
+  "license": "LGPL",
+  "require-dev": {
+    "squizlabs/php_codesniffer": "^2.3",
+    "escapestudios/symfony2-coding-standard": "^2.7"
+  }
+}
