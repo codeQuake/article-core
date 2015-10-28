@@ -131,16 +131,16 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
                 foreach ($this->categoryIDs as $categoryID) {
                     $this->categories[$categoryID] = new $className(CategoryHandler::getInstance()->getCategory($categoryID));
                 }
-        } else {
-            $sql = '
-                SELECT categoryID 
-                FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
-                WHERE '.static::getDatabaseTableIndexName().' = ?';
-                $statement = WCF::getDB()->prepareStatement($sql);
-                $statement->execute(array($this->{static::getDatabaseTableIndexName()}));
-                while ($row = $statement->fetchArray()) {
-                    $this->categories[$row['categoryID']] = new $className(CategoryHandler::getInstance()->getCategory($row['categoryID']));
-                }
+            } else {
+                $sql = '
+                    SELECT categoryID 
+                    FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
+                    WHERE '.static::getDatabaseTableIndexName().' = ?';
+                    $statement = WCF::getDB()->prepareStatement($sql);
+                    $statement->execute(array($this->{static::getDatabaseTableIndexName()}));
+                    while ($row = $statement->fetchArray()) {
+                        $this->categories[$row['categoryID']] = new $className(CategoryHandler::getInstance()->getCategory($row['categoryID']));
+                    }
             }
         }
 
@@ -181,7 +181,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     {
         if ($this->languageID) {
              return LanguageFactory::getInstance()->getLanguage($this->languageID);
-         }
+        }
 
         return;
     }
@@ -202,6 +202,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     public function getLink($appendSession = true)
     {
         $classParts = explode('\\', get_called_class());
+
         return LinkHandler::getInstance()->getLink(self::$objectViewController, array(
             'application' => $classParts[0],
             'object' => $this,
@@ -234,10 +235,10 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     public function getTags()
     {
         $tags = TagEngine::getInstance()->getObjectTags(
-            static::objectType,
+            self::$objectType,
             $this->{static::getDatabaseTableIndexName()},
-                array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
-            );
+            array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
+        );
 
         return $tags;
     }
