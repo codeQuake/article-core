@@ -43,10 +43,10 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
      */
     protected static $objectType = '';
 
-    /** 
+    /**
      * main controller for viewing objects of this class
-     * @var    string 
-     */ 
+     * @var string
+     */
     protected static $objectViewController = '';
 
     /**
@@ -124,11 +124,12 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
         if ($this->categories === null) {
             $this->categories = array();
 
-             if (0 !== count($this->categoryIDs)) {
-                foreach ($this->categoryIDs as $categoryID) {
-                    $this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
-                    }
-            } else {
+            if (0 !== count($this->categoryIDs)) {
+            foreach ($this->categoryIDs as $categoryID) {
+                $this->categories[$categoryID] = new self::$categoryBasicClass(CategoryHandler::getInstance()->getCategory($categoryID));
+                }
+       } 
+       else {
                 $sql = '
                     SELECT categoryID 
                     FROM '.$classParts[0].WCF_N.'_'.end($articleType).'_to_category
@@ -169,6 +170,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     {
         AttachmentBBCode::setObjectID($this->{static::getDatabaseTableIndexName()});
         MessageParser::getInstance()->setOutputType('text/html');
+        
         return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
     }
 
@@ -180,6 +182,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
         if ($this->languageID) {
              return LanguageFactory::getInstance()->getLanguage($this->languageID);
          }
+
         return;
     }
 
@@ -191,11 +194,11 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
         return '<img src="'.$this->getLanguage()->getIconPath().'" alt="" title="'.$this->getLanguage().'" class="jsTooltip iconFlag" />';
     }
 
-    /** 
-     * {@inheritdoc} 
-     * 
-     * @param bool $appendSession 
-     */ 
+    /**
+     * {@inheritdoc}
+     *
+     * @param bool $appendSession
+     */
     public function getLink($appendSession = true)
     {
         $classParts = explode('\\', get_called_class());
@@ -221,6 +224,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
     public function getSimplifiedFormattedMessage()
     {
         MessageParser::getInstance()->setOutputType('text/simplified-html');
+
         return MessageParser::getInstance()->parse($this->getMessage(), $this->enableSmilies, $this->enableHtml, $this->enableBBCodes);
     }
 
@@ -233,6 +237,7 @@ abstract class AbstractArticleDatabaseObject extends DatabaseObject implements I
                                                         $this->{static::getDatabaseTableIndexName()}, 
                                                         array(($this->languageID === null ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->languageID))
                                                         );
+
         return $tags;
     }
 
