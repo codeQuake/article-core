@@ -2,6 +2,7 @@
 namespace wcf\data;
 
 use wcf\system\WCF;
+
 /**
  * Abstract editor class for all article based database objects.
  *
@@ -13,7 +14,7 @@ use wcf\system\WCF;
 abstract class AbstractArticleDatabaseObjectEditor extends DatabaseObjectEditor
 {
     /**
-     * @param int[] categoryIDs
+     * @param int[] $categoryIDs
      */
     public function updateCategoryIDs(array $categoryIDs = array())
     {
