@@ -3,7 +3,7 @@ namespace wcf\data;
 
 use wcf\system\attachment\AttachmentHandler;
 use wcf\system\language\LanguageFactory;
-use wcf\system\tagging\TagEngine; 
+use wcf\system\tagging\TagEngine;
 
 /**
  * Abstract action class for all article based database objects.
@@ -77,18 +77,18 @@ class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
         foreach ($this->objects as $news) {
             if (isset($this->parameters['categoryIDs'])) {
                  $news->updateCategoryIDs($this->parameters['categoryIDs']);
-             }
-             // update tags
-             $tags = array();
-             if (isset($this->parameters['tags'])) {
-                 $tags = $this->parameters['tags'];
-                 unset($this->parameters['tags']);
-             }
-             if (!empty($tags)) {
-                 $languageID = (!isset($this->parameters['data']['languageID']) || ($this->parameters['data']['languageID'] === null)) ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->parameters['data']['languageID'];
-                 TagEngine::getInstance()->addObjectTags($articleClass::$objectType, $article->{$baseClass::getDatabaseTableIndexName()}, $tags, $languageID);
-             }
-         }
+            }
+            // update tags
+            $tags = array();
+            if (isset($this->parameters['tags'])) {
+                $tags = $this->parameters['tags'];
+                unset($this->parameters['tags']);
+            }
+            if (!empty($tags)) {
+                $languageID = (!isset($this->parameters['data']['languageID']) || ($this->parameters['data']['languageID'] === null)) ? LanguageFactory::getInstance()->getDefaultLanguageID() : $this->parameters['data']['languageID'];
+                TagEngine::getInstance()->addObjectTags($articleClass::$objectType, $article->{$baseClass::getDatabaseTableIndexName()}, $tags, $languageID);
+            }
+        }
     }
 
     /**
@@ -109,10 +109,10 @@ class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
         }
 
         // remove attachments
-         if (0 !== count($attachedObjectIDs)) {
-             AttachmentHandler::removeAttachments($articleClass::$objectType, $attachedObjectIDs);
-         }
+        if (0 !== count($attachedObjectIDs)) {
+            AttachmentHandler::removeAttachments($articleClass::$objectType, $attachedObjectIDs);
+        }
 
-         return parent::delete();
+        return parent::delete();
     }
 }
