@@ -61,4 +61,3 @@ abstract class AbstractViewableArticleDatabaseObject extends DatabaseObjectDecor
         return $this->userProfile;
     }
 }
-}
