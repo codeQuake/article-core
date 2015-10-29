@@ -14,8 +14,8 @@ matrix:
 
 before_script:
   - composer install --no-interaction
-  - vendor/bin/phpcs --config-set installed_paths vendor/escapestudios/symfony2-coding-standard
+  - vendor/bin/phpcbf --config-set installed_paths vendor/escapestudios/symfony2-coding-standard
 
 script:
   - find src -type f -name '*.php' |xargs -I file php -l file
-  - vendor/bin/phpcs -p --extensions=php --standard=Symfony2 src
+  - vendor/bin/phpcbf -p --extensions=php --standard=Symfony2 src
