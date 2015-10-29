@@ -59,6 +59,10 @@ class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
             TagEngine::getInstance()->addObjectTags($articleClass::$objectType, $article->{$baseClass::getDatabaseTableIndexName()}, $this->parameters['tags'], $languageID);
         }
 
+        // reset storage
+        // todo: check for isDisabled?!
+        UserStorageHandler::getInstance()->resetAll(self::$userStorageIdentifier);
+
         return $article;
     }
 
