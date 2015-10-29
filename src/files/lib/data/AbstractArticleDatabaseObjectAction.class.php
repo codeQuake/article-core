@@ -4,6 +4,7 @@ namespace wcf\data;
 use wcf\system\attachment\AttachmentHandler;
 use wcf\system\language\LanguageFactory;
 use wcf\system\tagging\TagEngine;
+use wcf\system\visitTracker\VisitTracker;
 
 /**
  * Abstract action class for all article based database objects.
@@ -15,6 +16,12 @@ use wcf\system\tagging\TagEngine;
  */
 class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
 {
+    /**
+     * Identifier where unread article count is saved
+     * @var string
+     */
+    protected static $userStorageIdentifier = '';
+
     /**
      * {@inheritdoc}
      */
@@ -114,5 +121,70 @@ class AbstractArticleDatabaseObjectAction extends AbstractDatabaseObjectAction
         }
 
         return parent::delete();
+    }
+
+    /**
+     * Validates parameters to mark news as read.
+     */
+    public function validateMarkAsRead()
+    {
+        if (0 === count($this->objects)) {
+            $this->readObjects();
+
+            if (0 === count($this->objects)) {
+                throw new UserInputException('objectIDs');
+            }
+        }
+    }
+
+    /**
+     * Mark news as read.
+     */
+    public function markAsRead()
+    {
+        //get classes
+        $baseClass = $this->className;
+        $articleClass = $baseClass::getBaseClass();
+
+        if (empty($this->parameters['visitTime'])) {
+            $this->parameters['visitTime'] = TIME_NOW;
+        }
+
+        if (0 === count($this->objects)) {
+            $this->readObjects();
+        }
+
+        foreach ($this->objects as $article) {
+            VisitTracker::getInstance()->trackObjectVisit($articleClass::$objectType, $article->{$baseClass::getDatabaseTableIndexName()}, $this->parameters['visitTime']);
+        }
+
+        // reset storage
+        if (WCF::getUser()->userID) {
+            UserStorageHandler::getInstance()->reset(array(WCF::getUser()->userID), self::$userStorageIdentifier);
+        }
+    }
+
+    /**
+     * Validates parameters to mark all news as read.
+     */
+    public function validateMarkAllAsRead()
+    {
+    }
+
+    /**
+     * Marks all news as read.
+     */
+    public function markAllAsRead()
+    {
+        //get classes
+        $baseClass = $this->className;
+        $articleClass = $baseClass::getBaseClass();
+
+        VisitTracker::getInstance()->trackTypeVisit($articleClass::$objectType);
+
+        // reset storage
+        if (WCF::getUser()->userID) {
+            UserStorageHandler::getInstance()->reset(array(WCF::getUser()->userID), self::$userStorageIdentifier);
+        }
     }
 }
