@@ -1,7 +1,6 @@
 <?php
-namespace wcf\data;
+namespace wcf\data\category;
 
-use wcf\data\category\AbstractDecoratedCategory;
 use wcf\system\breadcrumb\Breadcrumb;
 use wcf\system\breadcrumb\IBreadcrumbProvider;
 use wcf\system\category\CategoryHandler;

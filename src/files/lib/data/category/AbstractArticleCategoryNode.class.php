@@ -1,7 +1,5 @@
 <?php
-namespace wcf\data;
-
-use wcf\data\category\CategoryNode;
+namespace wcf\data\category;
 
 /**
  * manages the category cache
@@ -12,7 +10,7 @@ use wcf\data\category\CategoryNode;
  * @package de.codequake.core.article
  */
 
-abstract class AbstractArticleCategoryNode
+abstract class AbstractArticleCategoryNode extends CategoryNode
 {
     /**
      * {@inheritdoc}

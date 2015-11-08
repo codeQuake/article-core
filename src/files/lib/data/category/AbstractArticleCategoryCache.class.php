@@ -1,5 +1,5 @@
 <?php
-namespace wcf\data;
+namespace wcf\data\category;
 
 use wcf\system\database\util\PreparedStatementConditionBuilder;
 use wcf\system\language\LanguageFactory;
@@ -16,7 +16,7 @@ use wcf\system\WCF;
  * @package de.codequake.core.article
  */
 
-abstract class AbstractArticleCategoryCache
+abstract class AbstractArticleCategoryCache extends SingletonFactory
 {
     protected $unreadArticles;
 
