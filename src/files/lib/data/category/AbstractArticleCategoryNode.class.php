@@ -44,5 +44,4 @@ abstract class AbstractArticleCategoryNode extends CategoryNode
 
         return $this->articles;
     }
-
 }

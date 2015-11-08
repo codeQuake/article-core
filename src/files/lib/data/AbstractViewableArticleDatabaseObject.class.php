@@ -12,7 +12,7 @@ namespace wcf\data;
 abstract class AbstractViewableArticleDatabaseObject extends DatabaseObjectDecorator
 {
     protected $effectiveVisitTime;
-  
+
     public $userProfile;
 
      /**

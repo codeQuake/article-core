@@ -60,6 +60,7 @@ abstract class AbstractArticleCategory extends AbstractDecoratedCategory impleme
     public function getBreadcrumb()
     {
         $classParts = explode('\\', get_called_class());
+        
         return new Breadcrumb(WCF::getLanguage()->get($this->title), LinkHandler::getInstance()->getLink(self::$categoryController, array(
             'application' => $classParts[0],
             'object' => $this->getDecoratedObject(),
@@ -87,5 +88,4 @@ abstract class AbstractArticleCategory extends AbstractDecoratedCategory impleme
 
         return $categoryIDs;
     }
-
 }

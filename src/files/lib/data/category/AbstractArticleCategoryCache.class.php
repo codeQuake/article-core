@@ -66,7 +66,7 @@ abstract class AbstractArticleCategoryCache extends SingletonFactory
     {
         //Get application
         $classParts = explode('\\', get_called_class());
-        
+
         $conditionBuilder = new PreparedStatementConditionBuilder();
         $conditionBuilder->add(self::$articleType.'.isDeleted = 0');
         $conditionBuilder->add(self::$articleType.'.isDisabled = 0');
